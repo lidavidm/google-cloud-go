@@ -378,6 +378,9 @@ func (it *RowIterator) IsAccelerated() bool {
 func (it *RowIterator) ArrowIterator() (ArrowIterator, error) {
 	if !it.IsAccelerated() {
 		// TODO: can we convert plain RowIterator based on JSON API to an Arrow Stream ?
+		if it.arrowStorageError != nil {
+			return nil, it.arrowStorageError
+		}
 		return nil, errors.New("bigquery: require storage read API to be enabled")
 	}
 	return it.arrowIterator, nil

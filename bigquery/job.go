@@ -345,6 +345,7 @@ func (j *Job) read(ctx context.Context, waitForQuery func(context.Context, strin
 		}
 		it = newRowIterator(ctx, &rowSource{j: itJob}, pf)
 		it.TotalRows = totalRows
+		it.arrowStorageError = err
 	}
 	it.Schema = schema
 	return it, nil

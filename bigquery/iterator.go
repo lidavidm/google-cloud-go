@@ -50,6 +50,8 @@ type RowIterator struct {
 
 	arrowIterator ArrowIterator
 	arrowDecoder  *arrowDecoder
+	// if we failed to enable Arrow reader, record why
+	arrowStorageError error
 
 	pageInfo *iterator.PageInfo
 	nextFunc func() error
