@@ -171,6 +171,8 @@ type QueryConfig struct {
 
 	// Whether to run the query as continuous or a regular query.
 	Continuous bool
+
+	JobCreationMode *JobCreationMode
 }
 
 func (qc *QueryConfig) toBQ() (*bq.JobConfiguration, error) {
@@ -520,6 +522,9 @@ func (q *Query) probeFastPath() (*bq.QueryRequest, error) {
 			ProjectId: q.QueryConfig.DefaultProjectID,
 			DatasetId: q.QueryConfig.DefaultDatasetID,
 		}
+	}
+	if q.QueryConfig.JobCreationMode != nil {
+		qRequest.JobCreationMode = string(*q.QueryConfig.JobCreationMode)
 	}
 
 	if custCfg := q.client.customConfig; custCfg != nil {
