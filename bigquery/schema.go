@@ -292,6 +292,10 @@ func bqToSchema(ts *bq.TableSchema) Schema {
 	return s
 }
 
+func BqToSchema(ts *bq.TableSchema) Schema {
+	return bqToSchema(ts)
+}
+
 // FieldType is the type of field.
 type FieldType string
 
