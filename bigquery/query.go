@@ -467,40 +467,28 @@ func (q *Query) Read(ctx context.Context) (it *RowIterator, err error) {
 	return minimalJob.Read(ctx)
 }
 
-func (q *Query) TryRead(ctx context.Context) (resp *bq.QueryResponse, job *Job, affectedRows int64, err error) {
+func (q *Query) TryRead(ctx context.Context) (resp *bq.QueryResponse, err error) {
 	if q.QueryConfig.DryRun {
-		return nil, nil, -1, errors.New("bigquery: cannot evaluate Query.Read() for dry-run queries")
+		return nil, errors.New("bigquery: cannot evaluate Query.Read() for dry-run queries")
 	}
 	ctx = trace.StartSpan(ctx, "cloud.google.com/go/bigquery.Query.Run")
 	defer func() { trace.EndSpan(ctx, err) }()
 	queryRequest, err := q.probeFastPath()
 	if err != nil {
 		// Not suitable for fast path; bail and have the caller explicitly configure a job
-		return nil, nil, -1, nil
+		return nil, nil
 	}
 
 	// we have a config, run on fastPath.
 	resp, err = q.client.runQuery(ctx, queryRequest)
 	if err != nil {
-		return nil, nil, -1, err
+		return nil, err
 	}
 
-	// construct a minimal job for backing the row iterator.
-	if resp.JobReference != nil {
-		// The query had to create a job. Bail and let the caller handle things from here.
-		// TODO: we may get an inline response for the head of the stream, and be expected to use BQ Storage for the rest of it
+	// TODO: we may get an inline response for the head of the stream, and be expected to use BQ Storage for the rest of it (but client can handle this)
 
-		// N.B. while we could just return QueryResponse and expect the caller to create a Job, by constructing it here we potentially avoid a round-trip (since the public APIs to create a job fetch it from the API)
-		return resp, &Job{
-			c:         q.client,
-			jobID:     resp.JobReference.JobId,
-			location:  resp.JobReference.Location,
-			projectID: resp.JobReference.ProjectId,
-		}, -1, nil
-	}
-
-	// We don't defer to Storage Read API like the above code does - it assumes we have a job, so we can conclude that we would've already bailed
-	return resp, nil, resp.NumDmlAffectedRows, nil
+	// N.B. if a job was created, we could try to construct a "minimal Job" as the above code does and in theory avoid an extra round-trip to the API. However, this effectively hands client code a hand grenade: the job is not fully configured and various methods will inexplicably fail because invariants cannot be maintained. Only return a QueryResponse and expect the client to poll BigQuery for the "real" job.
+	return resp, nil
 }
 
 // probeFastPath is used to attempt configuring a jobs.Query request based on a
