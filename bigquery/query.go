@@ -175,6 +175,8 @@ type QueryConfig struct {
 	JobCreationMode *JobCreationMode
 
 	QueryResultsFormat *QueryResultsFormat
+
+	QueryResultsCompressionCodec *QueryResultsCompressionCodec
 }
 
 func (qc *QueryConfig) toBQ() (*bq.JobConfiguration, error) {
@@ -566,6 +568,7 @@ func (q *Query) probeFastPath() (*bq.QueryRequest, error) {
 	}
 	if q.QueryConfig.QueryResultsFormat != nil {
 		qRequest.QueryResultsFormat = string(*q.QueryConfig.QueryResultsFormat)
+		// XXX: the generated SDK code doesn't allow us to set compression
 	}
 
 	if custCfg := q.client.customConfig; custCfg != nil {
