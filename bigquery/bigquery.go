@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigquery/internal"
+	storage "cloud.google.com/go/bigquery/storage/apiv1"
 	cloudinternal "cloud.google.com/go/internal"
 	"cloud.google.com/go/internal/detect"
 	"cloud.google.com/go/internal/trace"
@@ -134,6 +135,13 @@ func (c *Client) EnableStorageReadClient(ctx context.Context, opts ...option.Cli
 	}
 	c.rc = rc
 	return nil
+}
+
+func (c *Client) StorageReadClient() *storage.BigQueryReadClient {
+	if c.rc == nil {
+		return nil
+	}
+	return c.rc.rawClient
 }
 
 func (c *Client) isStorageReadAvailable() bool {
