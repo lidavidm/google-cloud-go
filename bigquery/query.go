@@ -556,7 +556,11 @@ func (q *Query) probeFastPath() (*bq.QueryRequest, error) {
 	}
 	if q.QueryConfig.QueryResultsFormat != nil {
 		qRequest.QueryResultsFormat = string(*q.QueryConfig.QueryResultsFormat)
-		// XXX: the generated SDK code doesn't allow us to set compression
+		if q.QueryConfig.QueryResultsCompressionCodec != nil {
+			qRequest.ArrowSerializationOptions = &bq.ArrowSerializationOptions{
+				BufferCompression: string(*q.QueryConfig.QueryResultsCompressionCodec),
+			}
+		}
 	}
 
 	if custCfg := q.client.customConfig; custCfg != nil {
