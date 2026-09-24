@@ -62,6 +62,13 @@ func WithDefaultJobCreationMode(mode JobCreationMode) option.ClientOption {
 	return &applierJobCreationMode{mode: mode}
 }
 
+type QueryResultsFormat string
+
+var (
+	QueryResultsFormatArrow          QueryResultsFormat = "ARROW"
+	QueryResultsFormatStructEncoding QueryResultsFormat = "STRUCT_ENCODING"
+)
+
 // applier for propagating the custom client option to the config object
 type applierJobCreationMode struct {
 	internaloption.EmbeddableAdapter
