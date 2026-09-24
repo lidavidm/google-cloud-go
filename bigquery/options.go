@@ -69,6 +69,13 @@ var (
 	QueryResultsFormatStructEncoding QueryResultsFormat = "STRUCT_ENCODING"
 )
 
+type QueryResultsCompressionCodec string
+
+var (
+	QueryResultsCompressionCodecLZ4  QueryResultsCompressionCodec = "LZ4_FRAME"
+	QueryResultsCompressionCodecZSTD QueryResultsCompressionCodec = "ZSTD"
+)
+
 // applier for propagating the custom client option to the config object
 type applierJobCreationMode struct {
 	internaloption.EmbeddableAdapter
